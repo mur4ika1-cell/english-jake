@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0f0f0f">
+<title>English with Jake</title>
+<link rel="manifest" href="./manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:#0f0f0f;color:#e5e5e5;font-family:Inter,-apple-system,sans-serif;font-size:16px;line-height:1.5}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#1f1f1f;border-radius:2px}
+input,textarea,button{font-family:inherit;font-size:inherit;outline:none;border:none;background:none;color:inherit}
+button{cursor:pointer}
+a{color:#3b82f6;text-decoration:none}
+
+.overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:90;opacity:0;pointer-events:none;transition:opacity .3s}
+.overlay.show{opacity:1;pointer-events:auto}
+
+.modal{position:fixed;bottom:0;left:0;right:0;background:#0f0f0f;border:1px solid #1f1f1f;border-radius:16px 16px 0 0;z-index:100;padding:24px 20px 32px;transform:translateY(100%);transition:transform .3s ease;max-height:85vh;overflow-y:auto}
+.modal.show{transform:translateY(0)}
+.modal-handle{width:36px;height:4px;background:#1f1f1f;border-radius:2px;margin:-12px auto 16px}
+.modal-title{font-size:18px;font-weight:600;margin-bottom:16px}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:14px 24px;border-radius:16px;font-weight:600;font-size:15px;transition:all .2s;gap:8px}
+.btn-primary{background:#3b82f6;color:#fff}
+.btn-primary:hover{background:#2563eb}
+.btn-secondary{background:#1f1f1f;color:#e5e5e5;border:1px solid #2a2a2a}
+.btn-secondary:hover{background:#2a2a2a}
+.btn-ghost{color:#3b82f6;padding:8px 12px}
+.btn-danger{color:#ef4444}
+.btn-sm{padding:10px 16px;font-size:13px}
+.btn-block{width:100%;justify-content:center}
+.btn:disabled{opacity:.4;pointer-events:none}
+
+.card{background:#0f0f0f;border:1px solid #1f1f1f;border-radius:16px;padding:16px;margin-bottom:12px}
+.card-highlight{border-color:#3b82f6}
+
+.badge{display:inline-flex;align-items:center;padding:4px 10px;border-radius:8px;font-size:12px;font-weight:500}
+.badge-blue{background:rgba(59,130,246,.15);color:#3b82f6}
+.badge-green{background:rgba(34,197,94,.15);color:#22c55e}
+.badge-orange{background:rgba(249,115,22,.15);color:#f97316}
+
+input[type="text"],input[type="password"],textarea{width:100%;padding:14px 16px;background:#0f0f0f;border:1px solid #1f1f1f;border-radius:12px;color:#e5e5e5;font-size:15px;transition:border .2s}
+input[type="text"]:focus,input[type="password"]:focus,textarea:focus{border-color:#3b82f6}
+textarea{resize:vertical;min-height:100px}
+
+.tag{display:inline-flex;align-items:center;padding:6px 12px;background:#1f1f1f;border:1px solid #2a2a2a;border-radius:8px;font-size:13px;gap:6px;cursor:pointer;transition:all .2s}
+.tag.active{border-color:#3b82f6;background:rgba(59,130,246,.1);color:#3b82f6}
+.tag-remove{color:#666;cursor:pointer;font-size:14px;line-height:1}
+.tag-remove:hover{color:#ef4444}
+
+.empty-state{text-align:center;padding:48px 20px;color:#666}
+.empty-state-icon{font-size:48px;margin-bottom:16px}
+.empty-state-text{font-size:15px;margin-bottom:8px}
+
+.fade{transition:opacity .3s ease,transform .3s ease}
+.fade-enter{opacity:0;transform:translateY(12px)}
+.fade-enter-active{opacity:1;transform:translateY(0)}
+.fade-exit{opacity:0;transform:translateY(-12px)}
+
+.keyboard-safe{padding-bottom:env(safe-area-inset-bottom,0)}
+
+/* ONBOARDING */
+#onboarding{position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;background:#0f0f0f;padding:40px 24px;overflow-y:auto;display:none}
+#onboarding.show{display:flex;flex-direction:column;justify-content:center}
+.onboarding-title{font-size:28px;font-weight:700;margin-bottom:8px}
+.onboarding-subtitle{color:#666;font-size:15px;margin-bottom:32px;line-height:1.6}
+.onboarding-step{margin-bottom:24px}
+.onboarding-label{font-size:14px;font-weight:500;color:#888;margin-bottom:8px;display:block}
+.api-steps{background:#1f1f1f;border-radius:12px;padding:16px;margin:12px 0;font-size:14px;line-height:1.8;counter-reset:step}
+.api-steps li{list-style:none;counter-increment:step}
+.api-steps li::before{content:counter(step) ". ";color:#3b82f6;font-weight:600}
+.level-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.level-option{padding:14px;border:1px solid #1f1f1f;border-radius:12px;text-align:center;font-size:14px;cursor:pointer;transition:all .2s}
+.level-option:hover{border-color:#333}
+.level-option.active{border-color:#3b82f6;background:rgba(59,130,246,.1);color:#3b82f6}
+
+/* APP */
+#app{height:100%;display:none;flex-direction:column}
+#app.show{display:flex}
+
+/* HEADER */
+.header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 8px;flex-shrink:0}
+.header-title{font-size:20px;font-weight:700}
+.header-subtitle{font-size:13px;color:#666;margin-top:2px}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding:8px 16px 80px;-webkit-overflow-scrolling:touch}
+
+/* TAB NAV */
+.tab-nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#0f0f0f;border-top:1px solid #1f1f1f;padding:6px 0 env(safe-area-inset-bottom);z-index:50}
+.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:6px 0;cursor:pointer;transition:all .2s;gap:2px;font-size:10px;color:#555}
+.tab-item.active{color:#3b82f6}
+.tab-item-icon{font-size:20px;line-height:1}
+.tab-item-label{font-size:10px;font-weight:500}
+
+/* HOME */
+.streak-badge{display:inline-flex;align-items:center;gap:6px;background:#1f1f1f;border-radius:12px;padding:8px 14px;font-size:14px;font-weight:600}
+.streak-badge .fire{font-size:18px}
+.stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:16px 0}
+.stat-card{text-align:center;padding:12px;border:1px solid #1f1f1f;border-radius:12px}
+.stat-value{font-size:22px;font-weight:700}
+.stat-label{font-size:11px;color:#666;margin-top:4px}
+.quote-card{padding:20px;border:1px solid #1f1f1f;border-radius:16px;margin:16px 0;position:relative}
+.quote-text{font-size:15px;font-style:italic;line-height:1.6;color:#ccc}
+.quote-author{font-size:12px;color:#666;margin-top:8px}
+.actions{display:flex;gap:12px;flex-wrap:wrap}
+.actions .btn{flex:1;min-width:140px}
+
+/* CHAT */
+.chat-container{display:flex;flex-direction:column;height:100%}
+.chat-header{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #1f1f1f;margin-bottom:12px;flex-shrink:0}
+.chat-avatar{width:40px;height:40px;border-radius:50%;background:#3b82f6;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;flex-shrink:0}
+.chat-name{font-weight:600;font-size:15px}
+.chat-status{font-size:12px;color:#22c55e}
+.chat-messages{flex:1;overflow-y:auto;padding:8px 0;display:flex;flex-direction:column;gap:8px;-webkit-overflow-scrolling:touch}
+.message{max-width:85%;padding:12px 16px;border-radius:16px;font-size:14px;line-height:1.5;animation:fadeIn .3s ease}
+.message.user{align-self:flex-end;background:#3b82f6;color:#fff;border-bottom-right-radius:4px}
+.message.bot{align-self:flex-start;background:#1f1f1f;color:#e5e5e5;border:1px solid #2a2a2a;border-bottom-left-radius:4px}
+.message.error{align-self:center;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#ef4444;font-size:13px}
+.message-time{font-size:10px;color:rgba(255,255,255,.4);margin-top:4px;text-align:right}
+.message.bot .message-time{color:#555}
+.chat-input-bar{display:flex;gap:8px;padding:12px 0;border-top:1px solid #1f1f1f;flex-shrink:0}
+.chat-input-bar input{flex:1;background:#1f1f1f;border:1px solid #2a2a2a;border-radius:12px;padding:12px 16px;color:#e5e5e5}
+.chat-input-bar input:focus{border-color:#3b82f6}
+.chat-input-bar button{width:44px;height:44px;border-radius:12px;background:#3b82f6;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+.chat-input-bar button:disabled{opacity:.4}
+.chat-input-bar button svg{width:20px;height:20px;fill:#fff}
+.topic-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.topic-btn{padding:14px;border:1px solid #1f1f1f;border-radius:12px;text-align:center;font-size:13px;cursor:pointer;transition:all .2s;color:#888}
+.topic-btn:hover{border-color:#333;color:#e5e5e5}
+.topic-btn:active{transform:scale(.96)}
+
+/* WORDS */
+.word-input-row{display:flex;gap:8px;margin-bottom:12px}
+.word-input-row input{flex:1}
+.word-input-row button{flex-shrink:0}
+.word-list{display:flex;flex-direction:column;gap:8px}
+.word-item{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border:1px solid #1f1f1f;border-radius:12px;transition:all .2s}
+.word-item .word-en{font-weight:600;font-size:15px}
+.word-item .word-ru{color:#666;font-size:13px;margin-top:2px}
+.word-item .word-example{color:#555;font-size:12px;margin-top:4px;font-style:italic}
+.word-item .word-actions{display:flex;gap:8px;flex-shrink:0}
+.word-count{font-size:13px;color:#666;text-align:center;padding:8px 0}
+.card-study{z-index:80}
+.card-study .card-face{padding:40px 24px;text-align:center}
+.card-study .card-word{font-size:32px;font-weight:700;margin-bottom:8px}
+.card-study .card-translation{font-size:16px;color:#666;margin-bottom:24px;min-height:24px}
+.card-study .card-example{font-size:14px;color:#555;font-style:italic;margin-bottom:32px}
+.card-study .card-buttons{display:flex;gap:12px}
+.card-study .card-buttons .btn{flex:1}
+
+/* NOTES */
+.notes-header{display:flex;gap:8px;margin-bottom:12px}
+.notes-header input{flex:1}
+.note-item{padding:14px 16px;border:1px solid #1f1f1f;border-radius:12px;margin-bottom:8px;cursor:pointer;transition:all .2s}
+.note-item:hover{border-color:#2a2a2a}
+.note-item.pinned{border-color:#3b82f6}
+.note-title{font-weight:600;font-size:15px;display:flex;align-items:center;gap:8px}
+.note-title .pin{font-size:14px;color:#3b82f6}
+.note-preview{font-size:13px;color:#666;margin-top:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.note-tags{display:flex;gap:4px;margin-top:8px;flex-wrap:wrap}
+.note-tags .tag{font-size:11px;padding:3px 8px}
+.note-date{font-size:11px;color:#555;margin-top:6px}
+.note-edit textarea{min-height:120px;margin-bottom:12px}
+.note-edit .tag-input-row{display:flex;gap:8px;margin-bottom:12px}
+.note-edit .tag-input-row input{flex:1}
+
+/* PROGRESS */
+.progress-section{margin-bottom:24px}
+.progress-section-title{font-size:14px;font-weight:600;color:#888;margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px}
+.progress-level{text-align:center;padding:24px;border:1px solid #1f1f1f;border-radius:16px;margin-bottom:16px}
+.progress-level-name{font-size:24px;font-weight:700;color:#3b82f6;margin-bottom:4px}
+.progress-level-sub{font-size:13px;color:#666}
+.progress-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.heatmap{display:flex;flex-wrap:wrap;gap:3px;padding:4px 0}
+.heatmap-day{width:14px;height:14px;border-radius:3px;background:#1a1a1a;transition:background .2s}
+.heatmap-day.level-1{background:#1a2a4a}
+.heatmap-day.level-2{background:#1a3a6a}
+.heatmap-day.level-3{background:#2a5aaa}
+.heatmap-day.level-4{background:#3b82f6}
+.heatmap-day.today{outline:2px solid #3b82f6;outline-offset:1px}
+.heatmap-label{font-size:10px;color:#555;margin-top:4px}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.loading-dots{display:flex;gap:4px;padding:12px 16px;align-items:center}
+.loading-dots span{width:8px;height:8px;border-radius:50%;background:#555;animation:pulse 1s infinite}
+.loading-dots span:nth-child(2){animation-delay:.2s}
+.loading-dots span:nth-child(3){animation-delay:.4s}
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#1f1f1f;border:1px solid #2a2a2a;border-radius:12px;padding:12px 20px;font-size:14px;z-index:300;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<div id="onboarding" class="show">
+  <div id="ob-welcome">
+    <div class="onboarding-title">👋 Hey there!</div>
+    <div class="onboarding-subtitle">Let's set up your English with Jake app. It'll only take a minute.</div>
+    <button class="btn btn-primary btn-block" onclick="nextObStep()">Let's go!</button>
+  </div>
+  <div id="ob-name" style="display:none">
+    <div class="onboarding-title">What's your name?</div>
+    <div class="onboarding-subtitle">I'll use it to greet you every day</div>
+    <input type="text" id="ob-name-input" placeholder="Your name..." onkeydown="if(event.key==='Enter')nextObStep()" autocomplete="off">
+    <button class="btn btn-primary btn-block" style="margin-top:16px" onclick="nextObStep()">Next</button>
+  </div>
+  <div id="ob-level" style="display:none">
+    <div class="onboarding-title">Your English level?</div>
+    <div class="onboarding-subtitle">Don't worry, you can change it later</div>
+    <div class="level-grid">
+      <div class="level-option" data-lvl="beginner" onclick="selectLevel(this)">🌱 Beginner</div>
+      <div class="level-option" data-lvl="elementary" onclick="selectLevel(this)">🌿 Elementary</div>
+      <div class="level-option" data-lvl="pre-intermediate" onclick="selectLevel(this)">🌳 Pre-Intermediate</div>
+      <div class="level-option" data-lvl="intermediate" onclick="selectLevel(this)">🌲 Intermediate</div>
+    </div>
+    <button class="btn btn-primary btn-block" style="margin-top:16px" onclick="nextObStep()">Next</button>
+  </div>
+  <div id="ob-api" style="display:none">
+    <div class="onboarding-title">🔑 API Key</div>
+    <div class="onboarding-subtitle">To use AI features, you need a free Google Gemini API key</div>
+    <ol class="api-steps">
+      <li>Go to <a href="https://aistudio.google.com" target="_blank">aistudio.google.com</a></li>
+      <li>Click "Get API Key"</li>
+      <li>Click "Create API key"</li>
+      <li>Copy and paste it below</li>
+    </ol>
+    <input type="password" id="ob-api-input" placeholder="Paste your API key..." onkeydown="if(event.key==='Enter')finishOnboarding()" autocomplete="off">
+    <button class="btn btn-primary btn-block" style="margin-top:16px" onclick="finishOnboarding()">Start learning!</button>
+  </div>
+</div>
+
+<div id="app">
+  <div class="header">
+    <div>
+      <div class="header-title" id="header-greeting">👋 Hey!</div>
+      <div class="header-subtitle" id="header-date"></div>
+    </div>
+    <div id="install-btn" style="display:none">
+      <button class="btn btn-sm btn-secondary" onclick="installPwa()">+ Install</button>
+    </div>
+  </div>
+
+  <div class="content" id="content">
+    <!-- HOME -->
+    <div id="tab-home" class="tab-content">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div class="streak-badge"><span class="fire">🔥</span> <span id="streak-count">0</span> day streak</div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-value" id="stat-dialogs">0</div><div class="stat-label">Dialogues</div></div>
+        <div class="stat-card"><div class="stat-value" id="stat-words">0</div><div class="stat-label">Words</div></div>
+        <div class="stat-card"><div class="stat-value" id="stat-days">0</div><div class="stat-label">Days</div></div>
+      </div>
+      <div class="quote-card">
+        <div class="quote-text" id="quote-text">Loading today's quote...</div>
+        <div class="quote-author" id="quote-author">— Jake</div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" onclick="switchTab(1)">💬 Start Dialogue</button>
+        <button class="btn btn-secondary" onclick="switchTab(2)">📚 Study Words</button>
+      </div>
+    </div>
+
+    <!-- CHAT -->
+    <div id="tab-chat" class="tab-content" style="display:none">
+      <div class="chat-container">
+        <div class="chat-header">
+          <div class="chat-avatar">J</div>
+          <div>
+            <div class="chat-name">Jake</div>
+            <div class="chat-status">● Online</div>
+          </div>
+          <div style="margin-left:auto;display:flex;gap:4px">
+            <button class="btn btn-sm btn-ghost" onclick="clearChat()">✕</button>
+          </div>
+        </div>
+        <div id="topic-selector">
+          <div style="font-size:13px;color:#666;margin-bottom:8px">Choose a topic to start chatting:</div>
+          <div class="topic-grid">
+            <div class="topic-btn" onclick="startChat('free')">🗣️ Free Talk</div>
+            <div class="topic-btn" onclick="startChat('usa')">🇺🇸 Life in USA</div>
+            <div class="topic-btn" onclick="startChat('it')">💻 IT & Tech</div>
+            <div class="topic-btn" onclick="startChat('travel')">✈️ Travel</div>
+          </div>
+        </div>
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-input-bar" id="chat-input-bar" style="display:none">
+          <input type="text" id="chat-input" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendMessage()" autocomplete="off">
+          <button id="chat-send-btn" onclick="sendMessage()"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- WORDS -->
+    <div id="tab-words" class="tab-content" style="display:none">
+      <div class="word-input-row">
+        <input type="text" id="word-en-input" placeholder="English word..." onkeydown="if(event.key==='Enter')addWord()" autocomplete="off">
+        <input type="text" id="word-ru-input" placeholder="Translation..." onkeydown="if(event.key==='Enter')addWord()" autocomplete="off">
+        <button class="btn btn-primary btn-sm" onclick="addWord()">+</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <button class="btn btn-sm btn-secondary" onclick="startReview()">🔄 Review cards</button>
+        <button class="btn btn-sm btn-ghost" id="word-filter-btn" onclick="toggleStudyFilter()">📖 Only to study</button>
+      </div>
+      <div class="word-count" id="word-count"></div>
+      <div class="word-list" id="word-list"></div>
+    </div>
+
+    <!-- NOTES -->
+    <div id="tab-notes" class="tab-content" style="display:none">
+      <div class="notes-header">
+        <input type="text" id="notes-search" placeholder="Search notes..." oninput="renderNotes()" autocomplete="off">
+        <button class="btn btn-primary btn-sm" onclick="openNoteEditor()">+ New</button>
+      </div>
+      <div id="notes-list"></div>
+    </div>
+
+    <!-- PROGRESS -->
+    <div id="tab-progress" class="tab-content" style="display:none">
+      <div class="progress-section">
+        <div class="progress-section-title">Your Level</div>
+        <div class="progress-level">
+          <div class="progress-level-name" id="level-name">Beginner</div>
+          <div class="progress-level-sub" id="level-sub">0 / 50 words to next level</div>
+        </div>
+      </div>
+      <div class="progress-section">
+        <div class="progress-section-title">Activity (30 days)</div>
+        <div id="heatmap"></div>
+      </div>
+      <div class="progress-section">
+        <div class="progress-section-title">Statistics</div>
+        <div class="progress-stats">
+          <div class="stat-card"><div class="stat-value" id="p-stat-words">0</div><div class="stat-label">Words learned</div></div>
+          <div class="stat-card"><div class="stat-value" id="p-stat-dialogs">0</div><div class="stat-label">Dialogues</div></div>
+          <div class="stat-card"><div class="stat-value" id="p-stat-streak">0</div><div class="stat-label">Day streak</div></div>
+          <div class="stat-card"><div class="stat-value" id="p-stat-days">0</div><div class="stat-label">Days in app</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-nav">
+    <div class="tab-item active" data-tab="0" onclick="switchTab(0)"><span class="tab-item-icon">🏠</span><span class="tab-item-label">Home</span></div>
+    <div class="tab-item" data-tab="1" onclick="switchTab(1)"><span class="tab-item-icon">💬</span><span class="tab-item-label">Chat</span></div>
+    <div class="tab-item" data-tab="2" onclick="switchTab(2)"><span class="tab-item-icon">📚</span><span class="tab-item-label">Words</span></div>
+    <div class="tab-item" data-tab="3" onclick="switchTab(3)"><span class="tab-item-icon">📝</span><span class="tab-item-label">Notes</span></div>
+    <div class="tab-item" data-tab="4" onclick="switchTab(4)"><span class="tab-item-icon">📊</span><span class="tab-item-label">Progress</span></div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="overlay" id="overlay" onclick="closeModal()"></div>
+
+<div class="modal" id="modal-note">
+  <div class="modal-handle"></div>
+  <div class="modal-title" id="note-modal-title">New Note</div>
+  <div class="note-edit">
+    <input type="text" id="note-title-input" placeholder="Title..." style="margin-bottom:12px" autocomplete="off">
+    <textarea id="note-text-input" placeholder="Write your note here..."></textarea>
+    <div class="tag-input-row">
+      <input type="text" id="note-tag-input" placeholder="Add tag..." onkeydown="if(event.key==='Enter')addNoteTag()" autocomplete="off">
+      <button class="btn btn-sm btn-secondary" onclick="addNoteTag()">+</button>
+    </div>
+    <div id="note-tags-list" style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px"></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-secondary btn-sm" id="note-improve-btn" onclick="improveNote()">✨ Improve</button>
+      <div style="flex:1"></div>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="saveNote()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modal-review">
+  <div class="modal-handle"></div>
+  <div class="modal-title">Study Cards</div>
+  <div id="review-content">
+    <div class="card-study">
+      <div class="card-face">
+        <div class="card-word" id="review-word"></div>
+        <div class="card-translation" id="review-translation" style="visibility:hidden"></div>
+        <div class="card-example" id="review-example" style="visibility:hidden"></div>
+        <div class="card-buttons" id="review-buttons">
+          <button class="btn btn-secondary" onclick="reviewAnswer(false)">😕 Don't know</button>
+          <button class="btn btn-primary" onclick="reviewAnswer(true)">✅ Know</button>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="review-reveal-btn" onclick="revealCard()">👁 Show answer</button>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:12px;font-size:13px;color:#666"><span id="review-progress">0/0</span></div>
+  </div>
+  <div id="review-empty" style="display:none;text-align:center;padding:40px 0">
+    <div style="font-size:48px;margin-bottom:12px">🎉</div>
+    <div style="font-size:16px;font-weight:600;margin-bottom:4px">All done!</div>
+    <div style="font-size:13px;color:#666">No words to review right now</div>
+  </div>
+</div>
+
+<div class="modal" id="modal-error">
+  <div class="modal-handle"></div>
+  <div class="modal-title">❌ Error Analysis</div>
+  <div id="error-analysis-content" style="font-size:14px;line-height:1.6;white-space:pre-wrap"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============ STATE ============
+const STORAGE_KEY = 'english_jake_data';
+let state = loadState();
+let currentTab = 0;
+let editingNoteId = null;
+let noteEditTags = [];
+let reviewQueue = [];
+let reviewIndex = 0;
+let currentChatTopic = null;
+let installingPrompt = null;
+
+function defaultState() {
+  return {
+    settings: { name: '', level: 'beginner', apiKey: '', created: Date.now() },
+    words: [],
+    notes: [],
+    chats: [],
+    activity: {}, // "YYYY-MM-DD": true
+    lastVisit: null,
+    lastQuote: null,
+    dailyDialogs: 0
+  };
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const s = JSON.parse(raw);
+      // Ensure all keys exist
+      if (!s.settings) s.settings = defaultState().settings;
+      if (!s.words) s.words = [];
+      if (!s.notes) s.notes = [];
+      if (!s.chats) s.chats = [];
+      if (!s.activity) s.activity = {};
+      if (!s.dailyDialogs) s.dailyDialogs = 0;
+      return s;
+    }
+  } catch(e) {}
+  return defaultState();
+}
+
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function getToday() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function daysBetween(a, b) {
+  const da = new Date(a).setHours(0,0,0,0);
+  const db = new Date(b).setHours(0,0,0,0);
+  return Math.round((da - db) / 86400000);
+}
+
+// ============ ONBOARDING ============
+let obStep = 0;
+const obSteps = ['ob-welcome','ob-name','ob-level','ob-api'];
+
+function showObStep(i) {
+  obSteps.forEach((id, idx) => {
+    document.getElementById(id).style.display = idx === i ? 'block' : 'none';
+  });
+}
+
+function nextObStep() {
+  obStep++;
+  if (obStep >= obSteps.length) obStep = obSteps.length - 1;
+  showObStep(obStep);
+}
+
+function selectLevel(el) {
+  document.querySelectorAll('.level-option').forEach(o => o.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function finishOnboarding() {
+  const name = document.getElementById('ob-name-input').value.trim();
+  const levelEl = document.querySelector('.level-option.active');
+  const apiKey = document.getElementById('ob-api-input').value.trim();
+
+  if (!name) { toast('Please enter your name'); return; }
+  if (!levelEl) { toast('Please select your level'); return; }
+  if (!apiKey) { toast('Please paste your API key'); return; }
+
+  state.settings.name = name;
+  state.settings.level = levelEl.dataset.lvl;
+  state.settings.apiKey = apiKey;
+  state.lastVisit = getToday();
+  state.activity[getToday()] = true;
+  saveState();
+
+  document.getElementById('onboarding').classList.remove('show');
+  document.getElementById('app').classList.add('show');
+  initApp();
+}
+
+// ============ PWA INSTALL ============
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  installingPrompt = e;
+  document.getElementById('install-btn').style.display = 'block';
+});
+
+function installPwa() {
+  if (!installingPrompt) return;
+  installingPrompt.prompt();
+  installingPrompt.userChoice.then(() => {
+    installingPrompt = null;
+    document.getElementById('install-btn').style.display = 'none';
+  });
+}
+
+// ============ INIT ============
+function initApp() {
+  checkStreak();
+  updateHeader();
+  renderHome();
+  renderWords();
+  renderNotes();
+  renderProgress();
+  loadQuote();
+  loadLastChat();
+}
+
+function checkStreak() {
+  const today = getToday();
+  const last = state.lastVisit;
+  state.activity[today] = true;
+
+  if (last && last !== today) {
+    const diff = daysBetween(today, last);
+    if (diff > 1) {
+      // reset streak if >36h (more than 1 day gap)
+    }
+  }
+  state.lastVisit = today;
+  saveState();
+}
+
+function getStreak() {
+  let streak = 0;
+  const d = new Date();
+  while (true) {
+    const key = d.toISOString().split('T')[0];
+    if (state.activity[key]) {
+      streak++;
+      d.setDate(d.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+  return streak;
+}
+
+function getDaysInApp() {
+  const created = state.settings.created;
+  if (!created) return 1;
+  return Math.max(1, daysBetween(getToday(), new Date(created).toISOString().split('T')[0]) + 1);
+}
+
+function getWordCount() {
+  return state.words.filter(w => w.known).length;
+}
+
+function getLevel() {
+  const count = getWordCount();
+  if (count >= 800) return { name: 'Advanced', next: null, current: count };
+  if (count >= 501) return { name: 'Upper-Intermediate', next: 800, current: count };
+  if (count >= 301) return { name: 'Intermediate', next: 501, current: count };
+  if (count >= 151) return { name: 'Pre-Intermediate', next: 301, current: count };
+  if (count >= 51) return { name: 'Elementary', next: 151, current: count };
+  return { name: 'Beginner', next: 50, current: count };
+}
+
+function updateHeader() {
+  const greeting = document.getElementById('header-greeting');
+  const time = new Date();
+  const h = time.getHours();
+  let g = 'Hey';
+  if (h < 12) g = 'Good morning';
+  else if (h < 18) g = 'Good afternoon';
+  else g = 'Good evening';
+  greeting.textContent = `${g}, ${state.settings.name} 👋`;
+
+  const opts = { weekday:'long', month:'long', day:'numeric' };
+  document.getElementById('header-date').textContent = time.toLocaleDateString('en-US', opts);
+}
+
+// ============ TABS ============
+function switchTab(i) {
+  currentTab = i;
+  document.querySelectorAll('.tab-content').forEach((el, idx) => {
+    el.style.display = idx === i ? 'block' : 'none';
+  });
+  document.querySelectorAll('.tab-item').forEach((el, idx) => {
+    el.classList.toggle('active', idx === i);
+  });
+  if (i === 4) renderProgress();
+  if (i === 3) renderNotes();
+  if (i === 2) renderWords();
+}
+
+// ============ HOME ============
+function renderHome() {
+  document.getElementById('streak-count').textContent = getStreak();
+  const dialogs = state.chats.length;
+  document.getElementById('stat-dialogs').textContent = dialogs;
+  document.getElementById('stat-words').textContent = getWordCount();
+  document.getElementById('stat-days').textContent = getDaysInApp();
+  state.dailyDialogs = dialogs;
+  saveState();
+}
+
+// ============ QUOTE ============
+async function loadQuote() {
+  const today = getToday();
+  if (state.lastQuote && state.lastQuote.date === today) {
+    document.getElementById('quote-text').textContent = state.lastQuote.text;
+    return;
+  }
+  try {
+    const text = await callGemini(`Give me one short motivational quote in English about learning or growing. Just the quote text, no author prefix. Maximum 15 words.`);
+    state.lastQuote = { date: today, text };
+    saveState();
+    document.getElementById('quote-text').textContent = text;
+  } catch(e) {
+    document.getElementById('quote-text').textContent = '"The secret of getting ahead is getting started."';
+  }
+}
+
+// ============ AI ============
+async function callGemini(prompt, system) {
+  const apiKey = state.settings.apiKey;
+  if (!apiKey) throw new Error('API key not set');
+
+  const body = { contents: [{ parts: [{ text: prompt }] }] };
+  if (system) {
+    body.system_instruction = { parts: [{ text: system }] };
+  }
+
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+    { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) }
+  );
+
+  if (!res.ok) {
+    const err = await res.text();
+    if (res.status === 403 || res.status === 400) throw new Error('Invalid API key. Please check your key in settings.');
+    throw new Error('API error: ' + (err.slice(0,100) || res.status));
+  }
+
+  const data = await res.json();
+  if (!data.candidates || !data.candidates.length) throw new Error('No response from AI');
+  return data.candidates[0].content.parts[0].text;
+}
+
+// ============ CHAT ============
+function startChat(topic) {
+  currentChatTopic = topic;
+  document.getElementById('topic-selector').style.display = 'none';
+  document.getElementById('chat-input-bar').style.display = 'flex';
+  document.getElementById('chat-messages').innerHTML = '';
+
+  const greetings = {
+    free: "Hey! What's up? How was your day?",
+    usa: "Yo! Wanna know what life in LA is really like? Ask me anything!",
+    it: "Hey dude! You into tech too? What's your favorite language?",
+    travel: "Nice! I love traveling. Where do you wanna go first?"
+  };
+
+  addMessage(greetings[topic] || greetings.free, 'bot');
+  addAnalysisButton();
+}
+
+function addMessage(text, role) {
+  const div = document.createElement('div');
+  div.className = `message ${role}`;
+  div.textContent = text;
+  const time = document.createElement('div');
+  time.className = 'message-time';
+  time.textContent = new Date().toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+  div.appendChild(time);
+  document.getElementById('chat-messages').appendChild(div);
+  document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
+}
+
+function addAnalysisButton() {
+  const msgs = document.querySelectorAll('#chat-messages .message.user');
+  if (msgs.length === 0) return;
+  const existing = document.getElementById('analysis-btn-wrapper');
+  if (existing) existing.remove();
+
+  const wrapper = document.createElement('div');
+  wrapper.id = 'analysis-btn-wrapper';
+  wrapper.style.cssText = 'text-align:center;padding:4px 0';
+  const btn = document.createElement('button');
+  btn.className = 'btn btn-sm btn-ghost';
+  btn.textContent = '🔍 Analyze my errors';
+  btn.onclick = analyzeErrors;
+  wrapper.appendChild(btn);
+  document.getElementById('chat-messages').appendChild(wrapper);
+}
+
+function addTyping() {
+  const div = document.createElement('div');
+  div.className = 'message bot';
+  div.id = 'typing-indicator';
+  div.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div>';
+  document.getElementById('chat-messages').appendChild(div);
+  document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
+}
+
+function removeTyping() {
+  const el = document.getElementById('typing-indicator');
+  if (el) el.remove();
+}
+
+async function sendMessage() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  document.getElementById('chat-send-btn').disabled = true;
+
+  addMessage(text, 'user');
+  addTyping();
+
+  try {
+    const systemPrompt = `You are Jake, a friendly 17-year-old American guy from Los Angeles. You speak casual conversational English with slang. You're helping a ${state.settings.level} level English learner practice. If they write in Russian, respond in Russian but then suggest trying in English. Keep responses natural and not too long (2-4 sentences). Topic: ${currentChatTopic}. Be encouraging and cool.`;
+    const reply = await callGemini(text, systemPrompt);
+    removeTyping();
+    addMessage(reply, 'bot');
+    addAnalysisButton();
+  } catch(e) {
+    removeTyping();
+    addMessage('❌ ' + e.message, 'error');
+  }
+  document.getElementById('chat-send-btn').disabled = false;
+}
+
+async function analyzeErrors() {
+  const msgs = document.querySelectorAll('#chat-messages .message.user');
+  if (msgs.length === 0) return;
+
+  const history = Array.from(msgs).map(m => m.textContent.replace(/\d+:\d+.*/, '').trim()).filter(Boolean).join('\n');
+  if (!history) return;
+
+  closeModal();
+  setTimeout(async () => {
+    try {
+      const prompt = `Analyze these English messages from a Russian learner. For each mistake, show the error and correction. Be friendly and encouraging. Format as a short list. Messages:\n${history}`;
+      const analysis = await callGemini(prompt);
+      document.getElementById('error-analysis-content').textContent = analysis;
+      openModal('modal-error');
+    } catch(e) {
+      toast('Error: ' + e.message);
+    }
+  }, 200);
+}
+
+function clearChat() {
+  document.getElementById('chat-messages').innerHTML = '';
+  document.getElementById('topic-selector').style.display = 'block';
+  document.getElementById('chat-input-bar').style.display = 'none';
+  currentChatTopic = null;
+}
+
+function loadLastChat() {
+  // nothing to restore for now
+}
+
+// ============ WORDS ============
+let studyFilter = false;
+
+async function addWord() {
+  const en = document.getElementById('word-en-input').value.trim();
+  const ru = document.getElementById('word-ru-input').value.trim();
+  if (!en || !ru) { toast('Enter both English and translation'); return; }
+
+  const word = {
+    id: Date.now(),
+    en, ru,
+    example: '',
+    known: false,
+    added: getToday(),
+    nextReview: getToday(),
+    reviewed: 0
+  };
+
+  // Try to get example
+  try {
+    const example = await callGemini(`Give me one simple example sentence using the word "${en}". Just the sentence, nothing else. Max 12 words.`);
+    word.example = example;
+  } catch(e) {}
+
+  state.words.push(word);
+  saveState();
+  document.getElementById('word-en-input').value = '';
+  document.getElementById('word-ru-input').value = '';
+  renderWords();
+  toast('Word added! ' + (word.example ? '✨' : ''));
+}
+
+function renderWords() {
+  const list = document.getElementById('word-list');
+  const count = document.getElementById('word-count');
+
+  let words = state.words;
+  if (studyFilter) words = words.filter(w => w.nextReview <= getToday() && !w.known);
+
+  if (words.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📚</div><div class="empty-state-text">No words yet</div></div>';
+    count.textContent = `0 words · ${getWordCount()} known`;
+    return;
+  }
+
+  list.innerHTML = words.slice().reverse().map(w => `
+    <div class="word-item" style="${w.known ? 'opacity:.6' : ''}">
+      <div>
+        <div class="word-en">${w.en}</div>
+        <div class="word-ru">${w.ru}</div>
+        ${w.example ? `<div class="word-example">${w.example}</div>` : ''}
+      </div>
+      <div class="word-actions">
+        <button class="btn btn-sm btn-ghost ${w.known ? 'btn-danger' : ''}" onclick="toggleWordKnown(${w.id})">${w.known ? '✕' : '✓'}</button>
+        <button class="btn btn-sm btn-ghost" onclick="deleteWord(${w.id})">🗑</button>
+      </div>
+    </div>
+  `).join('');
+
+  count.textContent = `${state.words.length} words · ${getWordCount()} known`;
+}
+
+function toggleWordKnown(id) {
+  const w = state.words.find(x => x.id === id);
+  if (!w) return;
+  w.known = !w.known;
+  if (w.known) {
+    w.nextReview = new Date(Date.now() + 3*86400000).toISOString().split('T')[0];
+  } else {
+    w.nextReview = getToday();
+  }
+  saveState();
+  renderWords();
+  renderProgress();
+  renderHome();
+}
+
+function deleteWord(id) {
+  state.words = state.words.filter(w => w.id !== id);
+  saveState();
+  renderWords();
+  renderProgress();
+  renderHome();
+}
+
+function toggleStudyFilter() {
+  studyFilter = !studyFilter;
+  document.getElementById('word-filter-btn').textContent = studyFilter ? '📖 Show all' : '📖 Only to study';
+  renderWords();
+}
+
+function startReview() {
+  reviewQueue = state.words.filter(w => w.nextReview <= getToday() && !w.known);
+  if (reviewQueue.length === 0) {
+    document.getElementById('review-content').style.display = 'none';
+    document.getElementById('review-empty').style.display = 'block';
+  } else {
+    document.getElementById('review-content').style.display = 'block';
+    document.getElementById('review-empty').style.display = 'none';
+    reviewIndex = 0;
+    showReviewCard();
+  }
+  openModal('modal-review');
+}
+
+function showReviewCard() {
+  if (reviewIndex >= reviewQueue.length) {
+    document.getElementById('review-content').style.display = 'none';
+    document.getElementById('review-empty').style.display = 'block';
+    saveState();
+    renderWords();
+    return;
+  }
+  const w = reviewQueue[reviewIndex];
+  document.getElementById('review-word').textContent = w.en;
+  document.getElementById('review-translation').style.visibility = 'hidden';
+  document.getElementById('review-translation').textContent = w.ru;
+  document.getElementById('review-example').style.visibility = 'hidden';
+  document.getElementById('review-example').textContent = w.example || '';
+  document.getElementById('review-buttons').style.display = 'none';
+  document.getElementById('review-reveal-btn').style.display = 'block';
+  document.getElementById('review-progress').textContent = `${reviewIndex+1}/${reviewQueue.length}`;
+}
+
+function revealCard() {
+  document.getElementById('review-translation').style.visibility = 'visible';
+  document.getElementById('review-example').style.visibility = 'visible';
+  document.getElementById('review-buttons').style.display = 'flex';
+  document.getElementById('review-reveal-btn').style.display = 'none';
+}
+
+function reviewAnswer(known) {
+  const w = reviewQueue[reviewIndex];
+  if (known) {
+    w.nextReview = new Date(Date.now() + 3*86400000).toISOString().split('T')[0];
+    w.reviewed++;
+    if (w.reviewed >= 3) w.known = true;
+  } else {
+    w.nextReview = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+  }
+  reviewIndex++;
+  showReviewCard();
+  saveState();
+  renderHome();
+  renderProgress();
+}
+
+// ============ NOTES ============
+function renderNotes() {
+  const list = document.getElementById('notes-list');
+  const query = document.getElementById('notes-search').value.toLowerCase().trim();
+
+  let notes = state.notes;
+  if (query) {
+    notes = notes.filter(n => n.title.toLowerCase().includes(query) || n.text.toLowerCase().includes(query) || n.tags.some(t => t.toLowerCase().includes(query)));
+  }
+
+  const pinned = notes.filter(n => n.pinned);
+  const unpinned = notes.filter(n => !n.pinned);
+
+  if (notes.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📝</div><div class="empty-state-text">No notes yet</div></div>';
+    return;
+  }
+
+  const renderNote = (n) => `
+    <div class="note-item ${n.pinned ? 'pinned' : ''}" onclick="openNoteEditor(${n.id})">
+      <div class="note-title">${n.pinned ? '<span class="pin">📌</span>' : ''}${n.title || 'Untitled'}</div>
+      <div class="note-preview">${n.text.slice(0,120)}</div>
+      ${n.tags.length ? '<div class="note-tags">' + n.tags.map(t => `<span class="tag">${t}</span>`).join('') + '</div>' : ''}
+      <div class="note-date">${new Date(n.updated || n.created).toLocaleDateString('en-US', { month:'short', day:'numeric' })}</div>
+    </div>
+  `;
+
+  list.innerHTML = pinned.map(renderNote).join('') + unpinned.map(renderNote).join('');
+}
+
+function openNoteEditor(id) {
+  editingNoteId = id || null;
+  noteEditTags = [];
+
+  if (id) {
+    const n = state.notes.find(x => x.id === id);
+    if (!n) return;
+    document.getElementById('note-title-input').value = n.title;
+    document.getElementById('note-text-input').value = n.text;
+    noteEditTags = [...n.tags];
+    document.getElementById('note-modal-title').textContent = 'Edit Note';
+  } else {
+    document.getElementById('note-title-input').value = '';
+    document.getElementById('note-text-input').value = '';
+    noteEditTags = [];
+    document.getElementById('note-modal-title').textContent = 'New Note';
+  }
+  renderNoteTags();
+  openModal('modal-note');
+}
+
+function addNoteTag() {
+  const input = document.getElementById('note-tag-input');
+  const tag = input.value.trim().toLowerCase();
+  if (!tag || noteEditTags.includes(tag)) return;
+  noteEditTags.push(tag);
+  input.value = '';
+  renderNoteTags();
+}
+
+function renderNoteTags() {
+  const container = document.getElementById('note-tags-list');
+  if (noteEditTags.length === 0) {
+    container.innerHTML = '<span style="font-size:12px;color:#555">No tags</span>';
+    return;
+  }
+  container.innerHTML = noteEditTags.map(t =>
+    `<span class="tag">${t} <span class="tag-remove" onclick="removeNoteTag('${t}')">✕</span></span>`
+  ).join('');
+}
+
+function removeNoteTag(tag) {
+  noteEditTags = noteEditTags.filter(t => t !== tag);
+  renderNoteTags();
+}
+
+function saveNote() {
+  const title = document.getElementById('note-title-input').value.trim();
+  const text = document.getElementById('note-text-input').value.trim();
+  if (!text) { toast('Note text is empty'); return; }
+
+  if (editingNoteId) {
+    const n = state.notes.find(x => x.id === editingNoteId);
+    if (n) {
+      n.title = title;
+      n.text = text;
+      n.tags = noteEditTags;
+      n.updated = Date.now();
+    }
+  } else {
+    state.notes.push({
+      id: Date.now(),
+      title,
+      text,
+      tags: noteEditTags,
+      pinned: false,
+      created: Date.now(),
+      updated: Date.now()
+    });
+  }
+
+  saveState();
+  closeModal();
+  renderNotes();
+  toast('Note saved!');
+}
+
+async function improveNote() {
+  const text = document.getElementById('note-text-input').value.trim();
+  if (!text) { toast('Write something first'); return; }
+
+  try {
+    const improved = await callGemini(`Improve this English text or translate Russian to English. Return only the improved/translated text:\n\n${text}`);
+    document.getElementById('note-text-input').value = improved;
+    toast('✨ Improved!');
+  } catch(e) {
+    toast('Error: ' + e.message);
+  }
+}
+
+// ============ PROGRESS ============
+function renderProgress() {
+  const level = getLevel();
+  document.getElementById('level-name').textContent = level.name;
+  document.getElementById('level-sub').textContent = level.next
+    ? `${level.current} / ${level.next} words to next level`
+    : `🎉 Max level! ${level.current} words`;
+
+  document.getElementById('p-stat-words').textContent = getWordCount();
+  document.getElementById('p-stat-dialogs').textContent = state.chats.length;
+  document.getElementById('p-stat-streak').textContent = getStreak();
+  document.getElementById('p-stat-days').textContent = getDaysInApp();
+
+  renderHeatmap();
+}
+
+function renderHeatmap() {
+  const container = document.getElementById('heatmap');
+  const days = [];
+  const d = new Date();
+  for (let i = 29; i >= 0; i--) {
+    const date = new Date(d);
+    date.setDate(date.getDate() - i);
+    const key = date.toISOString().split('T')[0];
+    const active = state.activity[key];
+    const isToday = i === 0;
+    let level = 0;
+    if (active) {
+      const count = state.words.filter(w => w.added === key).length + (state.activity[key] ? 1 : 0);
+      level = Math.min(4, Math.ceil(count / 3) + 1);
+    }
+    days.push({ key, level, isToday });
+  }
+
+  container.innerHTML = days.map(d =>
+    `<div class="heatmap-day level-${d.level} ${d.isToday ? 'today' : ''}" title="${d.key}"></div>`
+  ).join('') + '<div class="heatmap-label">Last 30 days</div>';
+}
+
+// ============ MODALS ============
+function openModal(id) {
+  document.getElementById(id).classList.add('show');
+  document.getElementById('overlay').classList.add('show');
+}
+
+function closeModal() {
+  document.querySelectorAll('.modal').forEach(m => m.classList.remove('show'));
+  document.getElementById('overlay').classList.remove('show');
+}
+
+// ============ TOAST ============
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._timeout);
+  el._timeout = setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// ============ SW REGISTRATION ============
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+
+// ============ INIT CHECK ============
+if (state.settings.name && state.settings.apiKey) {
+  document.getElementById('onboarding').classList.remove('show');
+  document.getElementById('app').classList.add('show');
+  initApp();
+}
+</script>
+</body>
+</html>
