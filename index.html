@@ -227,13 +227,18 @@ textarea{resize:vertical;min-height:100px}
   </div>
   <div id="ob-api" style="display:none">
     <div class="onboarding-title">🔑 API Key</div>
-    <div class="onboarding-subtitle">To use AI features, you need a free Google Gemini API key</div>
-    <ol class="api-steps">
-      <li>Go to <a href="https://aistudio.google.com" target="_blank">aistudio.google.com</a></li>
-      <li>Click "Get API Key"</li>
-      <li>Click "Create API key"</li>
-      <li>Copy and paste it below</li>
-    </ol>
+    <div class="onboarding-subtitle">Choose your AI provider and paste your API key</div>
+    <div class="onboarding-step">
+      <label class="onboarding-label">Provider</label>
+      <select id="ob-provider" style="width:100%;padding:14px 16px;background:#0f0f0f;border:1px solid #1f1f1f;border-radius:12px;color:#e5e5e5;font-size:15px;font-family:inherit" onchange="updateObApiSteps()">
+        <option value="groq">Groq (free, fast — recommended)</option>
+        <option value="openai">OpenAI (ChatGPT)</option>
+        <option value="gemini">Google Gemini</option>
+      </select>
+    </div>
+    <div id="ob-api-steps" class="api-steps" style="list-style:none;padding:16px">
+      <div id="ob-api-instructions"></div>
+    </div>
     <input type="password" id="ob-api-input" placeholder="Paste your API key..." onkeydown="if(event.key==='Enter')finishOnboarding()" autocomplete="off">
     <button class="btn btn-primary btn-block" style="margin-top:16px" onclick="finishOnboarding()">Start learning!</button>
   </div>
@@ -245,8 +250,11 @@ textarea{resize:vertical;min-height:100px}
       <div class="header-title" id="header-greeting">👋 Hey!</div>
       <div class="header-subtitle" id="header-date"></div>
     </div>
-    <div id="install-btn" style="display:none">
-      <button class="btn btn-sm btn-secondary" onclick="installPwa()">+ Install</button>
+    <div style="display:flex;gap:4px;align-items:center">
+      <div id="install-btn" style="display:none">
+        <button class="btn btn-sm btn-secondary" onclick="installPwa()">+ Install</button>
+      </div>
+      <button class="btn btn-sm btn-ghost" onclick="openSettings()" title="Settings">⚙️</button>
     </div>
   </div>
 
@@ -413,6 +421,51 @@ textarea{resize:vertical;min-height:100px}
   <div id="error-analysis-content" style="font-size:14px;line-height:1.6;white-space:pre-wrap"></div>
 </div>
 
+<div class="modal" id="modal-settings">
+  <div class="modal-handle"></div>
+  <div class="modal-title">⚙️ Settings</div>
+  <div style="display:flex;flex-direction:column;gap:16px">
+    <div>
+      <label style="font-size:13px;color:#888;display:block;margin-bottom:6px">AI Provider</label>
+      <select id="settings-provider" style="width:100%;padding:14px 16px;background:#0f0f0f;border:1px solid #1f1f1f;border-radius:12px;color:#e5e5e5;font-size:15px;font-family:inherit">
+        <option value="groq">Groq (free, fast)</option>
+        <option value="openai">OpenAI (ChatGPT)</option>
+        <option value="gemini">Google Gemini</option>
+      </select>
+    </div>
+    <div>
+      <label style="font-size:13px;color:#888;display:block;margin-bottom:6px">Model</label>
+      <input type="text" id="settings-model" placeholder="llama-3.3-70b-versatile" style="width:100%;padding:14px 16px;background:#0f0f0f;border:1px solid #1f1f1f;border-radius:12px;color:#e5e5e5;font-size:15px;font-family:inherit">
+      <div style="font-size:11px;color:#555;margin-top:4px">
+        <span id="settings-model-hint">Default: llama-3.3-70b-versatile</span>
+      </div>
+    </div>
+    <div>
+      <label style="font-size:13px;color:#888;display:block;margin-bottom:6px">API Key</label>
+      <input type="password" id="settings-api-key" placeholder="Paste your API key..." style="width:100%;padding:14px 16px;background:#0f0f0f;border:1px solid #1f1f1f;border-radius:12px;color:#e5e5e5;font-size:15px;font-family:inherit">
+    </div>
+    <div>
+      <label style="font-size:13px;color:#888;display:block;margin-bottom:6px">API URL (optional, for custom providers)</label>
+      <input type="text" id="settings-api-url" placeholder="https://api.groq.com/openai/v1/chat/completions" style="width:100%;padding:14px 16px;background:#0f0f0f;border:1px solid #1f1f1f;border-radius:12px;color:#e5e5e5;font-size:15px;font-family:inherit">
+      <div style="font-size:11px;color:#555;margin-top:4px">Leave empty to use default URL for selected provider</div>
+    </div>
+    <div>
+      <label style="font-size:13px;color:#888;display:block;margin-bottom:6px">Your Name</label>
+      <input type="text" id="settings-name" placeholder="Your name..." style="width:100%;padding:14px 16px;background:#0f0f0f;border:1px solid #1f1f1f;border-radius:12px;color:#e5e5e5;font-size:15px;font-family:inherit">
+    </div>
+    <div>
+      <label style="font-size:13px;color:#888;display:block;margin-bottom:6px">English Level</label>
+      <select id="settings-level" style="width:100%;padding:14px 16px;background:#0f0f0f;border:1px solid #1f1f1f;border-radius:12px;color:#e5e5e5;font-size:15px;font-family:inherit">
+        <option value="beginner">🌱 Beginner</option>
+        <option value="elementary">🌿 Elementary</option>
+        <option value="pre-intermediate">🌳 Pre-Intermediate</option>
+        <option value="intermediate">🌲 Intermediate</option>
+      </select>
+    </div>
+    <button class="btn btn-primary btn-block" onclick="saveSettings()">Save</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -429,7 +482,7 @@ let installingPrompt = null;
 
 function defaultState() {
   return {
-    settings: { name: '', level: 'beginner', apiKey: '', created: Date.now() },
+    settings: { name: '', level: 'beginner', apiKey: '', created: Date.now(), provider: 'groq', model: '', apiUrl: '' },
     words: [],
     notes: [],
     chats: [],
@@ -475,11 +528,28 @@ function daysBetween(a, b) {
 // ============ ONBOARDING ============
 let obStep = 0;
 const obSteps = ['ob-welcome','ob-name','ob-level','ob-api'];
+const OB_STEPS_INFO = {
+  groq:   { label: 'Go to <a href="https://console.groq.com/keys" target="_blank">console.groq.com/keys</a> → Create API Key', name: 'Groq' },
+  openai: { label: 'Go to <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com/api-keys</a> → Create new secret key', name: 'OpenAI' },
+  gemini: { label: 'Go to <a href="https://aistudio.google.com" target="_blank">aistudio.google.com</a> → Get API Key → Create API key', name: 'Gemini' },
+};
+
+function updateObApiSteps() {
+  const p = document.getElementById('ob-provider').value;
+  const info = OB_STEPS_INFO[p] || OB_STEPS_INFO.groq;
+  document.getElementById('ob-api-instructions').innerHTML = `
+    <div style="margin-bottom:8px;font-weight:500">${info.name} API key:</div>
+    <ol style="margin:0;padding-left:20px">
+      <li>${info.label}</li>
+      <li>Copy and paste it below</li>
+    </ol>`;
+}
 
 function showObStep(i) {
   obSteps.forEach((id, idx) => {
     document.getElementById(id).style.display = idx === i ? 'block' : 'none';
   });
+  if (i === 3) updateObApiSteps();
 }
 
 function nextObStep() {
@@ -497,6 +567,7 @@ function finishOnboarding() {
   const name = document.getElementById('ob-name-input').value.trim();
   const levelEl = document.querySelector('.level-option.active');
   const apiKey = document.getElementById('ob-api-input').value.trim();
+  const provider = document.getElementById('ob-provider')?.value || 'groq';
 
   if (!name) { toast('Please enter your name'); return; }
   if (!levelEl) { toast('Please select your level'); return; }
@@ -505,6 +576,7 @@ function finishOnboarding() {
   state.settings.name = name;
   state.settings.level = levelEl.dataset.lvl;
   state.settings.apiKey = apiKey;
+  state.settings.provider = provider;
   state.lastVisit = getToday();
   state.activity[getToday()] = true;
   saveState();
@@ -639,7 +711,7 @@ async function loadQuote() {
     return;
   }
   try {
-    const text = await callGemini(`Give me one short motivational quote in English about learning or growing. Just the quote text, no author prefix. Maximum 15 words.`);
+    const text = await callAI(`Give me one short motivational quote in English about learning or growing. Just the quote text, no author prefix. Maximum 15 words.`);
     state.lastQuote = { date: today, text };
     saveState();
     document.getElementById('quote-text').textContent = text;
@@ -649,29 +721,56 @@ async function loadQuote() {
 }
 
 // ============ AI ============
-async function callGemini(prompt, system) {
-  const apiKey = state.settings.apiKey;
-  if (!apiKey) throw new Error('API key not set');
+const AI_DEFAULTS = {
+  groq:   { model: 'llama-3.3-70b-versatile',   url: 'https://api.groq.com/openai/v1/chat/completions' },
+  openai: { model: 'gpt-4o-mini',                url: 'https://api.openai.com/v1/chat/completions' },
+  gemini: { model: 'gemini-2.0-flash',           url: '' }, // special handling
+};
 
-  const body = { contents: [{ parts: [{ text: prompt }] }] };
-  if (system) {
-    body.system_instruction = { parts: [{ text: system }] };
+async function callAI(prompt, system) {
+  const { apiKey, provider, model, apiUrl } = state.settings;
+  if (!apiKey) throw new Error('API key not set. Open settings to configure.');
+
+  const cfg = AI_DEFAULTS[provider] || AI_DEFAULTS.groq;
+  const finalModel = model || cfg.model;
+
+  if (provider === 'gemini') {
+    const body = { contents: [{ parts: [{ text: prompt }] }] };
+    if (system) body.system_instruction = { parts: [{ text: system }] };
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${finalModel}:generateContent?key=${apiKey}`,
+      { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) }
+    );
+    if (!res.ok) {
+      const err = await res.text().catch(() => '');
+      if (res.status === 403 || res.status === 400) throw new Error('Invalid API key');
+      throw new Error('API error: ' + (err.slice(0,100) || res.status));
+    }
+    const data = await res.json();
+    if (!data.candidates || !data.candidates.length) throw new Error('No response from AI');
+    return data.candidates[0].content.parts[0].text;
   }
 
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-    { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) }
-  );
+  // OpenAI-compatible (Groq, OpenAI, custom)
+  const url = apiUrl || cfg.url;
+  const messages = [{ role: 'user', content: prompt }];
+  if (system) messages.unshift({ role: 'system', content: system });
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+    body: JSON.stringify({ model: finalModel, messages }),
+  });
 
   if (!res.ok) {
-    const err = await res.text();
-    if (res.status === 403 || res.status === 400) throw new Error('Invalid API key. Please check your key in settings.');
+    const err = await res.text().catch(() => '');
+    if (res.status === 401) throw new Error('Invalid API key');
     throw new Error('API error: ' + (err.slice(0,100) || res.status));
   }
 
   const data = await res.json();
-  if (!data.candidates || !data.candidates.length) throw new Error('No response from AI');
-  return data.candidates[0].content.parts[0].text;
+  if (!data.choices || !data.choices.length) throw new Error('No response from AI');
+  return data.choices[0].message.content;
 }
 
 // ============ CHAT ============
@@ -747,7 +846,7 @@ async function sendMessage() {
 
   try {
     const systemPrompt = `You are Jake, a friendly 17-year-old American guy from Los Angeles. You speak casual conversational English with slang. You're helping a ${state.settings.level} level English learner practice. If they write in Russian, respond in Russian but then suggest trying in English. Keep responses natural and not too long (2-4 sentences). Topic: ${currentChatTopic}. Be encouraging and cool.`;
-    const reply = await callGemini(text, systemPrompt);
+    const reply = await callAI(text, systemPrompt);
     removeTyping();
     addMessage(reply, 'bot');
     addAnalysisButton();
@@ -769,7 +868,7 @@ async function analyzeErrors() {
   setTimeout(async () => {
     try {
       const prompt = `Analyze these English messages from a Russian learner. For each mistake, show the error and correction. Be friendly and encouraging. Format as a short list. Messages:\n${history}`;
-      const analysis = await callGemini(prompt);
+      const analysis = await callAI(prompt);
       document.getElementById('error-analysis-content').textContent = analysis;
       openModal('modal-error');
     } catch(e) {
@@ -809,7 +908,7 @@ async function addWord() {
 
   // Try to get example
   try {
-    const example = await callGemini(`Give me one simple example sentence using the word "${en}". Just the sentence, nothing else. Max 12 words.`);
+    const example = await callAI(`Give me one simple example sentence using the word "${en}". Just the sentence, nothing else. Max 12 words.`);
     word.example = example;
   } catch(e) {}
 
@@ -1048,7 +1147,7 @@ async function improveNote() {
   if (!text) { toast('Write something first'); return; }
 
   try {
-    const improved = await callGemini(`Improve this English text or translate Russian to English. Return only the improved/translated text:\n\n${text}`);
+    const improved = await callAI(`Improve this English text or translate Russian to English. Return only the improved/translated text:\n\n${text}`);
     document.getElementById('note-text-input').value = improved;
     toast('✨ Improved!');
   } catch(e) {
@@ -1113,6 +1212,51 @@ function toast(msg) {
   el.classList.add('show');
   clearTimeout(el._timeout);
   el._timeout = setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// ============ SETTINGS ============
+function openSettings() {
+  document.getElementById('settings-provider').value = state.settings.provider || 'groq';
+  document.getElementById('settings-model').value = state.settings.model || '';
+  document.getElementById('settings-api-key').value = state.settings.apiKey || '';
+  document.getElementById('settings-api-url').value = state.settings.apiUrl || '';
+  document.getElementById('settings-name').value = state.settings.name || '';
+  document.getElementById('settings-level').value = state.settings.level || 'beginner';
+  updateModelHint();
+  openModal('modal-settings');
+}
+
+function updateModelHint() {
+  const provider = document.getElementById('settings-provider').value;
+  const cfg = AI_DEFAULTS[provider] || AI_DEFAULTS.groq;
+  document.getElementById('settings-model-hint').textContent = `Default: ${cfg.model}`;
+}
+
+document.getElementById('settings-provider')?.addEventListener('change', function() {
+  const cfg = AI_DEFAULTS[this.value] || AI_DEFAULTS.groq;
+  if (!document.getElementById('settings-model').value) {
+    document.getElementById('settings-model').placeholder = cfg.model;
+  }
+  updateModelHint();
+  if (this.value !== 'gemini') {
+    const defaultUrl = AI_DEFAULTS[this.value]?.url || '';
+    if (!document.getElementById('settings-api-url').value) {
+      document.getElementById('settings-api-url').placeholder = defaultUrl;
+    }
+  }
+});
+
+function saveSettings() {
+  state.settings.provider = document.getElementById('settings-provider').value;
+  state.settings.model = document.getElementById('settings-model').value.trim();
+  state.settings.apiKey = document.getElementById('settings-api-key').value.trim();
+  state.settings.apiUrl = document.getElementById('settings-api-url').value.trim();
+  state.settings.name = document.getElementById('settings-name').value.trim();
+  state.settings.level = document.getElementById('settings-level').value;
+  saveState();
+  updateHeader();
+  closeModal();
+  toast('Settings saved!');
 }
 
 // ============ SW REGISTRATION ============
